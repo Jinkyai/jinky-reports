@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Jinky Suitability Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1a202c;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            background: #f7fafc;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .charts-section {
+            padding: 60px 40px;
+        }
+        
+        .charts-section h2 {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #2d3748;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .chart-container {
+            background: #f7fafc;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 1.2rem;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+        }
+        
+        .subscription-section {
+            background: #f7fafc;
+            padding: 60px 40px;
+        }
+        
+        .subscription-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #2d3748;
+        }
+        
+        .subscription-section > p {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .pricing-card.featured {
+            border: 3px solid #667eea;
+        }
+        
+        .badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .price-period {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .features li {
+            padding: 10px 0;
+            color: #4a5568;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .features li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .cta-button {
+            width: 100%;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-button:hover {
+            background: #5a67d8;
+        }
+        
+        .cta-button.secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .cta-button.secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Your Suitability Report</h1>
+            <p>AI Platform Buyer Network Analysis</p>
+        </div>
+        
+        <!-- Stats Overview -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCompanies">496</div>
+                <div class="stat-label">Matched Companies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1,038</div>
+                <div class="stat-label">Total in Network</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="matchRate">47.8%</div>
+                <div class="stat-label">Match Rate</div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <h2>Buyer Distribution Analysis</h2>
+            
+            <div class="charts-grid">
+                <!-- Revenue Chart -->
+                <div class="chart-container">
+                    <h3>Revenue Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Employee Chart -->
+                <div class="chart-container">
+                    <h3>Employee Count</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="employeeChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Ownership Chart -->
+                <div class="chart-container">
+                    <h3>Ownership Type</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="ownershipChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Industry Chart -->
+                <div class="chart-container">
+                    <h3>Industry Breakdown</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="industryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subscription Section -->
+        <div class="subscription-section">
+            <h2>Choose Your Subscription Tier</h2>
+            <p>Select a plan to start connecting with matched buyers and unlock your full report</p>
+            
+            <div class="pricing-grid">
+                <!-- Starter Tier -->
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="price">$299</div>
+                    <div class="price-period">per month</div>
+                    <ul class="features">
+                        <li>Access to 100 matched buyers</li>
+                        <li>Basic analytics dashboard</li>
+                        <li>Monthly industry reports</li>
+                        <li>Email support</li>
+                    </ul>
+                    <a href="mailto:hello@jinky.ai?subject=Starter Plan Inquiry" class="cta-button secondary">Contact Us</a>
+                </div>
+                
+                <!-- Growth Tier -->
+                <div class="pricing-card featured">
+                    <div class="badge">MOST POPULAR</div>
+                    <h3>Growth</h3>
+                    <div class="price">$599</div>
+                    <div class="price-period">per month</div>
+                    <ul class="features">
+                        <li>Access to all matched buyers</li>
+                        <li>Advanced analytics & insights</li>
+                        <li>Weekly buyer updates</li>
+                        <li>90-min ICP workshop included</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <a href="mailto:hello@jinky.ai?subject=Growth Plan Inquiry" class="cta-button">Contact Us</a>
+                </div>
+                
+                <!-- Enterprise Tier -->
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">$1,499</div>
+                    <div class="price-period">per month</div>
+                    <ul class="features">
+                        <li>Full network access (1,000+ buyers)</li>
+                        <li>Custom buyer discovery</li>
+                        <li>Dedicated account manager</li>
+                        <li>Quarterly ICP workshops</li>
+                        <li>API access</li>
+                        <li>White-label options</li>
+                    </ul>
+                    <a href="mailto:hello@jinky.ai?subject=Enterprise Plan Inquiry" class="cta-button secondary">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Chart.js color palette
+        const chartColors = {
+            purple: '#667eea',
+            pink: '#764ba2',
+            blue: '#4299e1',
+            green: '#48bb78',
+            orange: '#ed8936',
+            red: '#f56565',
+            teal: '#38b2ac',
+            yellow: '#ecc94b'
+        };
+        
+        const colorPalette = Object.values(chartColors);
+        
+        // Default data (will be replaced by URL params if available)
+        let revenueData = { labels: ['$1,001+', '$101-$500', '$51-$100', '$11-$50', '$501-$1,000', '$1-$10'], values: [37.9, 23.4, 5.8, 11.7, 11.9, 2.6] };
+        let employeeData = { labels: ['1,001-5,000', '51-200', '5,001+', '201-500', '501-1,000', '1-50'], values: [24.4, 19.8, 15.7, 15.3, 15.7, 7.7] };
+        let ownershipData = { labels: ['VC/PE', 'Public', 'REIT', 'Privately-held', 'Government'], values: [78.8, 12.3, 5.2, 3.0, 0.6] };
+        let industryData = { labels: ['Manufacturing', 'Finance & Insurance', 'Real Estate & Rental'], values: [64.5, 28.8, 6.7] };
+        
+        // Revenue Chart
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'doughnut',
+            data: {
+                labels: revenueData.labels,
+                datasets: [{
+                    data: revenueData.values,
+                    backgroundColor: colorPalette
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+        
+        // Employee Chart
+        new Chart(document.getElementById('employeeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: employeeData.labels,
+                datasets: [{
+                    data: employeeData.values,
+                    backgroundColor: colorPalette
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+        
+        // Ownership Chart
+        new Chart(document.getElementById('ownershipChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ownershipData.labels,
+                datasets: [{
+                    data: ownershipData.values,
+                    backgroundColor: colorPalette
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+        
+        // Industry Chart
+        new Chart(document.getElementById('industryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: industryData.labels,
+                datasets: [{
+                    data: industryData.values,
+                    backgroundColor: [chartColors.purple, chartColors.blue, chartColors.green]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
